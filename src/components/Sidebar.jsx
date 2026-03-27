@@ -1,9 +1,11 @@
 import React from 'react';
-import { Settings, MessageSquare, Sliders, Zap } from 'lucide-react';
+import { NavLink } from 'react-router-dom';
+import { Settings, MessageSquare, Sliders, Zap, LayoutDashboard, Code2 } from 'lucide-react';
 
 const Sidebar = ({ config, setConfig }) => {
   return (
-    <div className="w-80 h-full bg-zinc-950/80 backdrop-blur-xl border-r border-zinc-800/60 p-6 flex flex-col gap-8 shadow-2xl z-10">
+    <div className="w-80 h-full bg-zinc-950/80 backdrop-blur-xl border-r border-zinc-800/60 p-6 flex flex-col gap-6 shadow-2xl z-10 overflow-y-auto">
+      
       {/* Brand Header */}
       <div className="flex items-center gap-3 mb-2">
         <div className="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg shadow-lg shadow-cyan-500/20">
@@ -14,6 +16,30 @@ const Sidebar = ({ config, setConfig }) => {
         </h1>
       </div>
 
+      {/* Navigation Menu */}
+      <nav className="flex flex-col gap-2">
+        <p className="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-2">Menu</p>
+        
+        <NavLink to="/" className={({ isActive }) => `flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'}`}>
+          <LayoutDashboard size={18} /> Dashboard
+        </NavLink>
+        
+        <NavLink to="/playground" className={({ isActive }) => `flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'}`}>
+          <MessageSquare size={18} /> AI Playground
+        </NavLink>
+
+        <NavLink to="/code-analyzer" className={({ isActive }) => `flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'}`}>
+          <Code2 size={18} /> Code Analyzer
+        </NavLink>
+
+        <NavLink to="/settings" className={({ isActive }) => `flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'}`}>
+          <Settings size={18} /> Settings
+        </NavLink>
+      </nav>
+
+      {/* Divider */}
+      <div className="h-px w-full bg-zinc-800/50 my-2"></div>
+
       {/* System Instruction */}
       <div className="flex flex-col gap-3">
         <label className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
@@ -22,13 +48,13 @@ const Sidebar = ({ config, setConfig }) => {
         <textarea
           value={config.systemPrompt}
           onChange={(e) => setConfig({ ...config, systemPrompt: e.target.value })}
-          className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 text-sm h-36 resize-none focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all shadow-inner placeholder:text-zinc-600 leading-relaxed"
+          className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 text-sm h-32 resize-none focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all shadow-inner placeholder:text-zinc-600 leading-relaxed"
           placeholder="e.g. You are an expert React developer. Always answer in Markdown..."
         />
       </div>
 
       {/* Parameters */}
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6 pb-4">
         <label className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
           <Sliders size={14} /> Parameters
         </label>
@@ -67,6 +93,7 @@ const Sidebar = ({ config, setConfig }) => {
           />
         </div>
       </div>
+      
     </div>
   );
 };

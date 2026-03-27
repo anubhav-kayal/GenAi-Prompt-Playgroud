@@ -1,8 +1,16 @@
 import React, { useState } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import ChatArea from './components/ChatArea';
+import CodeAnalyzer from './components/CodeAnalyzer';
+
+// Temporary placeholder components for the new pages
+const Dashboard = () => <div className="p-8 text-white h-full flex items-center justify-center text-2xl font-bold">Dashboard Analytics Loading...</div>;
+
+const Settings = () => <div className="p-8 text-white h-full flex items-center justify-center text-2xl font-bold">App Settings...</div>;
 
 function App() {
+  // Global state to pass down to different routes
   const [config, setConfig] = useState({
     systemPrompt: '',
     temperature: 0.7,
@@ -10,11 +18,24 @@ function App() {
   });
 
   return (
-    // Added a subtle radial gradient for a premium dark mode feel
-    <div className="flex h-screen overflow-hidden bg-zinc-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(6,182,212,0.15),rgba(255,255,255,0))] text-zinc-50 font-sans tracking-wide">
-      <Sidebar config={config} setConfig={setConfig} />
-      <ChatArea config={config} />
-    </div>
+    <BrowserRouter>
+      <div className="flex h-screen overflow-hidden bg-zinc-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(6,182,212,0.15),rgba(255,255,255,0))] text-zinc-50 font-sans tracking-wide">
+        
+        {/* Sidebar is now global navigation */}
+        <Sidebar config={config} setConfig={setConfig} />
+        
+        {/* Main Content Area changes based on the URL */}
+        <main className="flex-1 relative overflow-hidden">
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/playground" element={<ChatArea config={config} />} />
+            <Route path="/code-analyzer" element={<CodeAnalyzer />} />
+            <Route path="/settings" element={<Settings />} />
+          </Routes>
+        </main>
+
+      </div>
+    </BrowserRouter>
   );
 }
 
