@@ -3,9 +3,9 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import ChatArea from './components/ChatArea';
 import CodeAnalyzer from './components/CodeAnalyzer';
+import Dashboard from './components/Dashboard';
 
-// Temporary placeholder components for the new pages
-const Dashboard = () => <div className="p-8 text-white h-full flex items-center justify-center text-2xl font-bold">Dashboard Analytics Loading...</div>;
+
 
 const Settings = () => <div className="p-8 text-white h-full flex items-center justify-center text-2xl font-bold">App Settings...</div>;
 
