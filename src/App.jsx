@@ -4,10 +4,8 @@ import Sidebar from './components/Sidebar';
 import ChatArea from './components/ChatArea';
 import CodeAnalyzer from './components/CodeAnalyzer';
 import Dashboard from './components/Dashboard';
+import  Settings  from './components/Settings';
 
-
-
-const Settings = () => <div className="p-8 text-white h-full flex items-center justify-center text-2xl font-bold">App Settings...</div>;
 
 function App() {
   // Global state to pass down to different routes
