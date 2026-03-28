@@ -26,6 +26,18 @@ const sanitizeUrl = (value, maxLength = 2048) => {
   return '';
 };
 
+const getAvatarFromProfile = (profile) => {
+  if (!profile || typeof profile !== 'object') return '';
+
+  return (
+    sanitizeUrl(profile.avatar) ||
+    sanitizeUrl(profile.photoURL) ||
+    sanitizeUrl(profile.picture) ||
+    sanitizeUrl(profile.imageUrl) ||
+    ''
+  );
+};
+
 export const getDefaultAvatar = (seed = 'Guest') => {
   const safeSeed = sanitizeText(seed, 80) || 'Guest';
   return `https://api.dicebear.com/9.x/notionists/svg?seed=${encodeURIComponent(safeSeed)}`;
