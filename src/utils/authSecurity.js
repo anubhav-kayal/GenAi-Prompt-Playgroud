@@ -47,8 +47,8 @@ export const buildUserProfile = (profile, fallbackProfile = {}) => {
   const name = sanitizeText(profile?.name, 80) || sanitizeText(fallbackProfile.name, 80) || 'Nexus User';
   const email = sanitizeText(profile?.email, 120) || sanitizeText(fallbackProfile.email, 120) || 'No email connected';
   const avatar =
-    sanitizeUrl(profile?.avatar) ||
-    sanitizeUrl(fallbackProfile.avatar) ||
+    getAvatarFromProfile(profile) ||
+    getAvatarFromProfile(fallbackProfile) ||
     getDefaultAvatar(name || email);
 
   return { name, email, avatar };
@@ -57,9 +57,9 @@ export const buildUserProfile = (profile, fallbackProfile = {}) => {
 export const normalizeUserProfile = (profile) => {
   if (!profile || typeof profile !== 'object') return null;
 
-  const name = sanitizeText(profile.name, 80);
+  const name = sanitizeText(profile.name, 80) || sanitizeText(profile.displayName, 80);
   const email = sanitizeText(profile.email, 120);
-  const avatar = sanitizeUrl(profile.avatar);
+  const avatar = getAvatarFromProfile(profile);
 
   if (!name || !email) return null;
   return {
