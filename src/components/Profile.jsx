@@ -14,12 +14,21 @@ import {
 } from 'lucide-react';
 import { buildUserProfile, getCachedUserProfile, getDefaultAvatar, getSafeStoredObject } from '../utils/authSecurity';
 import { getLogs, getStats } from '../utils/logger';
+import { auth } from '../firebase';
 
 const Profile = () => {
+  const authFallback = auth.currentUser
+    ? {
+        name: auth.currentUser.displayName || 'Nexus User',
+        email: auth.currentUser.email || 'No email connected',
+        avatar: auth.currentUser.photoURL || '',
+      }
+    : null;
+
   const fallbackProfile = {
-    name: 'Nexus User',
-    email: 'No email connected',
-    avatar: '',
+    name: authFallback?.name || 'Nexus User',
+    email: authFallback?.email || 'No email connected',
+    avatar: authFallback?.avatar || '',
   };
 
   const userProfile = buildUserProfile(getCachedUserProfile(), fallbackProfile);
