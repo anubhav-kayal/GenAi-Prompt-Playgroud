@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Key, User, Palette, Save, ShieldCheck, AlertCircle, Lock, Database } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { buildUserProfile, getCachedUserProfile, getDefaultAvatar, getSafeStoredObject } from '../utils/authSecurity';
+import { auth } from '../firebase';
 
 // Custom Mouse-Tracking Spotlight Component
 const SpotlightCard = ({ children, className = "" }) => {
@@ -38,11 +39,19 @@ const SpotlightCard = ({ children, className = "" }) => {
 };
 
 const Settings = () => {
+  const authFallback = auth.currentUser
+    ? {
+        name: auth.currentUser.displayName || 'Guest',
+        email: auth.currentUser.email || '',
+        avatar: auth.currentUser.photoURL || '',
+      }
+    : { name: 'Guest', email: '', avatar: '' };
+
   const [apiKey, setApiKey] = useState('');
   const [isSaved, setIsSaved] = useState(false);
   const [activeTab, setActiveTab] = useState('api');
   const [userProfile, setUserProfile] = useState(
-    buildUserProfile(null, { name: 'Guest', email: '', avatar: '' })
+    buildUserProfile(null, authFallback)
   );
   
   // App Preferences State
@@ -60,7 +69,9 @@ const Settings = () => {
     // 2. Load Real Google Auth Profile
     const savedUser = getCachedUserProfile();
     if (savedUser) {
-      setUserProfile(buildUserProfile(savedUser, { name: 'Guest', email: '', avatar: '' }));
+      setUserProfile(buildUserProfile(savedUser, authFallback));
+    } else {
+      setUserProfile(buildUserProfile(null, authFallback));
     }
 
     // 3. Load User Preferences
