@@ -155,6 +155,100 @@ const ChatArea = () => {
     }
   };
 
+  const handleSavePromptVersion = () => {
+    const prompt = config.systemPrompt.trim();
+    if (!prompt) {
+      toast.error('System prompt is empty. Add text before saving.');
+      return;
+    }
+
+    const normalizedLabel = versionLabel.trim();
+    const nextLabel = normalizedLabel || getNextVersionLabel(promptVersions);
+
+    const duplicateLabel = promptVersions.some(
+      (version) => version.label.toLowerCase() === nextLabel.toLowerCase()
+    );
+
+    if (duplicateLabel) {
+      toast.error('A version with this label already exists.');
+      return;
+    }
+
+    const version = {
+      id: crypto.randomUUID(),
+      label: nextLabel,
+      prompt,
+      isFavorite: false,
+      createdAt: new Date().toISOString(),
+    };
+
+    setPromptVersions((prev) => [version, ...prev]);
+    setVersionLabel('');
+    toast.success(`Saved ${nextLabel}`);
+  };
+
+  const handleRestorePromptVersion = (version) => {
+    setConfig((prev) => ({ ...prev, systemPrompt: version.prompt }));
+    toast.success(`Restored ${version.label}`);
+  };
+
+  const handleFavoriteToggle = (id) => {
+    setPromptVersions((prev) =>
+      prev.map((version) =>
+        version.id === id ? { ...version, isFavorite: !version.isFavorite } : version
+      )
+    );
+  };
+
+  const handleDuplicateVersion = (version) => {
+    const duplicateLabel = getUniqueLabel(promptVersions, `${version.label}-copy`);
+    const duplicate = {
+      ...version,
+      id: crypto.randomUUID(),
+      label: duplicateLabel,
+      isFavorite: false,
+      createdAt: new Date().toISOString(),
+    };
+
+    setPromptVersions((prev) => [duplicate, ...prev]);
+    toast.success(`Duplicated ${version.label}`);
+  };
+
+  const handleDeleteVersion = (id) => {
+    setPromptVersions((prev) => prev.filter((version) => version.id !== id));
+    setCompareSelection((prev) => prev.filter((selectedId) => selectedId !== id));
+  };
+
+  const toggleCompareSelection = (id) => {
+    setCompareSelection((prev) => {
+      if (prev.includes(id)) {
+        return prev.filter((selectedId) => selectedId !== id);
+      }
+      if (prev.length === 2) {
+        return [prev[1], id];
+      }
+      return [...prev, id];
+    });
+  };
+
+  const comparedVersions = compareSelection
+    .map((id) => promptVersions.find((version) => version.id === id))
+    .filter(Boolean);
+
+  const sortedVersions = [...promptVersions].sort((a, b) => {
+    if (a.isFavorite !== b.isFavorite) {
+      return a.isFavorite ? -1 : 1;
+    }
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
+
+  const stopGeneration = () => {
+    if (!isTyping) return;
+    activeRequestRef.current = 0;
+    setIsTyping(false);
+    toast('Response stopped');
+  };
+
   return (
     <div className="flex h-full w-full bg-zinc-950 relative overflow-hidden">
       <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-cyan-500/5 blur-[120px] rounded-full pointer-events-none"></div>
