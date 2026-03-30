@@ -1,38 +1,72 @@
-import React, { useState } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Sidebar from './components/Sidebar';
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+
+// Import components
+import Layout from './components/Layout';
+import Dashboard from './components/Dashboard';
 import ChatArea from './components/ChatArea';
 import CodeAnalyzer from './components/CodeAnalyzer';
-import Dashboard from './components/Dashboard';
-import  Settings  from './components/Settings';
+import Settings from './components/Settings';
+import Login from './components/Login';
+import Landing from './components/Landing';
 
+// 🛡️ AUTHENTICATION GUARDS
+const ProtectedRoute = ({ children }) => {
+  const user = localStorage.getItem('nexus_user');
+  if (!user) return <Navigate to="/login" replace />;
+  return children;
+};
+
+const PublicRoute = ({ children }) => {
+  const user = localStorage.getItem('nexus_user');
+  if (user) return <Navigate to="/dashboard" replace />;
+  return children;
+};
 
 function App() {
-  // Global state to pass down to different routes
-  const [config, setConfig] = useState({
-    systemPrompt: '',
-    temperature: 0.7,
-    maxLength: 1000,
-  });
-
   return (
     <BrowserRouter>
-      <div className="flex h-screen overflow-hidden bg-zinc-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(6,182,212,0.15),rgba(255,255,255,0))] text-zinc-50 font-sans tracking-wide">
+      <Routes>
         
-        {/* Sidebar is now global navigation */}
-        <Sidebar config={config} setConfig={setConfig} />
-        
-        {/* Main Content Area changes based on the URL */}
-        <main className="flex-1 relative overflow-hidden">
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/playground" element={<ChatArea config={config} />} />
-            <Route path="/code-analyzer" element={<CodeAnalyzer />} />
-            <Route path="/settings" element={<Settings />} />
-          </Routes>
-        </main>
+        {/* UNIVERSAL ENTRY POINT */}
+        <Route path="/" element={<Landing />} />
 
-      </div>
+        {/* AUTHENTICATION */}
+        <Route 
+          path="/login" 
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          } 
+        />
+
+        {/* PROTECTED APPLICATION SHELL */}
+        <Route 
+          path="/dashboard" 
+          element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }
+        >
+          {/* path: /dashboard */}
+          <Route index element={<Dashboard />} />
+          
+          {/* path: /dashboard/playground */}
+          <Route path="playground" element={<ChatArea />} />
+          
+          {/* path: /dashboard/code-analyzer */}
+          <Route path="code-analyzer" element={<CodeAnalyzer />} />
+          
+          {/* path: /dashboard/settings */}
+          <Route path="settings" element={<Settings />} />
+        </Route>
+
+        {/* GLOBAL CATCH-ALL: Prevents broken links from showing a white screen */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+
+      </Routes>
     </BrowserRouter>
   );
 }
