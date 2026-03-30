@@ -56,6 +56,12 @@ const ChatArea = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [showConfig, setShowConfig] = useState(true);
   const [isListening, setIsListening] = useState(false);
+  const [versionLabel, setVersionLabel] = useState('');
+  const [promptVersions, setPromptVersions] = useState(() =>
+    safeParse(localStorage.getItem(PROMPT_VERSIONS_KEY), [])
+  );
+  const [compareSelection, setCompareSelection] = useState([]);
+  const activeRequestRef = useRef(0);
   const messagesEndRef = useRef(null);
 
   const [config, setConfig] = useState({
@@ -70,6 +76,10 @@ const ChatArea = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages, isTyping]);
+
+  useEffect(() => {
+    localStorage.setItem(PROMPT_VERSIONS_KEY, JSON.stringify(promptVersions));
+  }, [promptVersions]);
 
   // Voice Input Logic
   const startListening = () => {
