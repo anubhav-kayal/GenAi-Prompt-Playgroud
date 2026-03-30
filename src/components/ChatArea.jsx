@@ -11,6 +11,45 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { logActivity } from '../utils/logger';
 import toast from 'react-hot-toast';
 
+const PROMPT_VERSIONS_KEY = 'nexus_prompt_versions';
+
+const safeParse = (value, fallback = []) => {
+  if (!value) return fallback;
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+const getNextVersionLabel = (versions) => {
+  const max = versions.reduce((acc, version) => {
+    const match = /^v(\d+)$/i.exec(version.label?.trim() || '');
+    if (!match) return acc;
+    return Math.max(acc, Number(match[1]));
+  }, 0);
+
+  return `v${max + 1}`;
+};
+
+const getUniqueLabel = (versions, baseLabel) => {
+  const normalizedBase = baseLabel.trim();
+  const existing = new Set(versions.map((version) => version.label.toLowerCase()));
+  if (!existing.has(normalizedBase.toLowerCase())) {
+    return normalizedBase;
+  }
+
+  let counter = 2;
+  let candidate = `${normalizedBase}-${counter}`;
+  while (existing.has(candidate.toLowerCase())) {
+    counter += 1;
+    candidate = `${normalizedBase}-${counter}`;
+  }
+
+  return candidate;
+};
+
 const ChatArea = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
