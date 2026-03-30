@@ -2,12 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  color-scheme: dark;
-}
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+    font-family: 'Inter', 'Space Grotesk', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  }
 
-body {
-  @apply bg-zinc-950 text-zinc-50;
-  margin: 0;
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  body {
+    @apply font-sans;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display tracking-tighter;
+  }
 }
