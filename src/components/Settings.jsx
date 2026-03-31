@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Key, User, Palette, Save, ShieldCheck, AlertCircle, Lock, Database } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { getCachedUserProfile, getSafeStoredObject } from '../utils/authSecurity';
+import { buildUserProfile, getCachedUserProfile, getDefaultAvatar, getSafeStoredObject } from '../utils/authSecurity';
 
 // Custom Mouse-Tracking Spotlight Component
 const SpotlightCard = ({ children, className = "" }) => {
@@ -41,7 +41,9 @@ const Settings = () => {
   const [apiKey, setApiKey] = useState('');
   const [isSaved, setIsSaved] = useState(false);
   const [activeTab, setActiveTab] = useState('api');
-  const [userProfile, setUserProfile] = useState({ name: 'Guest', email: '', avatar: '' });
+  const [userProfile, setUserProfile] = useState(
+    buildUserProfile(null, { name: 'Guest', email: '', avatar: '' })
+  );
   
   // App Preferences State
   const [toggles, setToggles] = useState({
@@ -57,7 +59,9 @@ const Settings = () => {
 
     // 2. Load Real Google Auth Profile
     const savedUser = getCachedUserProfile();
-    if (savedUser) setUserProfile(savedUser);
+    if (savedUser) {
+      setUserProfile(buildUserProfile(savedUser, { name: 'Guest', email: '', avatar: '' }));
+    }
 
     // 3. Load User Preferences
     const savedPrefs = getSafeStoredObject('nexus_prefs', null);
@@ -185,11 +189,16 @@ const Settings = () => {
               <SpotlightCard>
                 <div className="flex items-center gap-6 mb-8">
                   <div className="w-24 h-24 bg-zinc-900 rounded-full flex items-center justify-center border-4 border-zinc-950 shadow-2xl relative overflow-hidden">
-                    {userProfile.avatar ? (
-                      <img src={userProfile.avatar} alt="Profile" className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-3xl font-black text-cyan-400">GU</span>
-                    )}
+                    <img
+                      src={userProfile.avatar}
+                      alt="Profile"
+                      referrerPolicy="no-referrer"
+                      onError={(event) => {
+                        event.currentTarget.onerror = null;
+                        event.currentTarget.src = getDefaultAvatar(userProfile.name);
+                      }}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <div>
                     <h4 className="text-2xl font-bold text-white mb-1">{userProfile.name}</h4>

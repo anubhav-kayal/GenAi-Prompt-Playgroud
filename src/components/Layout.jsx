@@ -8,7 +8,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '../firebase';
-import { cacheUserProfile, clearCachedUserProfile, getCachedUserProfile } from '../utils/authSecurity';
+import {
+  buildUserProfile,
+  cacheUserProfile,
+  clearCachedUserProfile,
+  getCachedUserProfile,
+  getDefaultAvatar,
+} from '../utils/authSecurity';
 
 
 
@@ -39,11 +45,11 @@ const Layout = () => {
         return;
       }
 
-      const profile = cacheUserProfile({
+      const profile = cacheUserProfile(buildUserProfile({
         name: firebaseUser.displayName || 'Nexus User',
         email: firebaseUser.email || 'No email',
-        avatar: firebaseUser.photoURL || 'https://api.dicebear.com/9.x/notionists/svg?seed=Guest',
-      });
+        avatar: firebaseUser.photoURL || '',
+      }));
 
       setAuthProfile(profile);
     });
@@ -55,11 +61,11 @@ const Layout = () => {
   const savedUser = authProfile;
   
   // Fallback to a Guest profile just in case someone bypasses the login page
-  const user = savedUser || {
+  const user = buildUserProfile(savedUser, {
     name: "Guest User",
     email: "Login required",
-    avatar: "https://api.dicebear.com/9.x/notionists/svg?seed=Guest"
-  };
+    avatar: getDefaultAvatar('Guest'),
+  });
 
   // Update your handleLogout function to actually clear the data!
 
@@ -193,7 +199,16 @@ const Layout = () => {
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
                 className="flex items-center gap-2 hover:bg-zinc-900 py-1 px-2 rounded-lg transition-colors"
               >
-                <img src={user.avatar} alt="Profile" className="w-8 h-8 rounded-full border border-zinc-700 bg-zinc-800" />
+                <img
+                  src={user.avatar}
+                  alt="Profile"
+                  referrerPolicy="no-referrer"
+                  onError={(event) => {
+                    event.currentTarget.onerror = null;
+                    event.currentTarget.src = getDefaultAvatar(user.name);
+                  }}
+                  className="w-8 h-8 rounded-full border border-zinc-700 bg-zinc-800"
+                />
                 <div className="hidden md:block text-left">
                   <p className="text-sm font-bold leading-tight">{user.name}</p>
                   <p className="text-[10px] text-zinc-500 font-medium">{user.email}</p>

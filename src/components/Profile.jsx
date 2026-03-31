@@ -12,7 +12,7 @@ import {
   Settings,
   BadgeCheck,
 } from 'lucide-react';
-import { getCachedUserProfile, getSafeStoredObject } from '../utils/authSecurity';
+import { buildUserProfile, getCachedUserProfile, getDefaultAvatar, getSafeStoredObject } from '../utils/authSecurity';
 import { getLogs, getStats } from '../utils/logger';
 
 const Profile = () => {
@@ -22,7 +22,7 @@ const Profile = () => {
     avatar: '',
   };
 
-  const userProfile = getCachedUserProfile() || fallbackProfile;
+  const userProfile = buildUserProfile(getCachedUserProfile(), fallbackProfile);
   const stats = getStats();
   const recentLogs = getLogs().slice(0, 6);
   const preferences = getSafeStoredObject('nexus_prefs', {
@@ -71,11 +71,16 @@ const Profile = () => {
         >
           <div className="flex flex-col md:flex-row md:items-center gap-6 md:gap-8">
             <div className="w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden border-2 border-zinc-700/80 bg-zinc-950 flex items-center justify-center shadow-xl">
-              {userProfile.avatar ? (
-                <img src={userProfile.avatar} alt="Profile" className="w-full h-full object-cover" />
-              ) : (
-                <UserRound size={38} className="text-cyan-400" />
-              )}
+              <img
+                src={userProfile.avatar}
+                alt="Profile"
+                referrerPolicy="no-referrer"
+                onError={(event) => {
+                  event.currentTarget.onerror = null;
+                  event.currentTarget.src = getDefaultAvatar(userProfile.name);
+                }}
+                className="w-full h-full object-cover"
+              />
             </div>
 
             <div className="flex-1">

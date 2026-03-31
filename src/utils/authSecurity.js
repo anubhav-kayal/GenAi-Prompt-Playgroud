@@ -15,15 +15,46 @@ const sanitizeText = (value, maxLength) => {
   return value.trim().slice(0, maxLength);
 };
 
+const sanitizeUrl = (value, maxLength = 2048) => {
+  const url = sanitizeText(value, maxLength);
+  if (!url) return '';
+
+  if (/^https?:\/\//i.test(url)) {
+    return url;
+  }
+
+  return '';
+};
+
+export const getDefaultAvatar = (seed = 'Guest') => {
+  const safeSeed = sanitizeText(seed, 80) || 'Guest';
+  return `https://api.dicebear.com/9.x/notionists/svg?seed=${encodeURIComponent(safeSeed)}`;
+};
+
+export const buildUserProfile = (profile, fallbackProfile = {}) => {
+  const name = sanitizeText(profile?.name, 80) || sanitizeText(fallbackProfile.name, 80) || 'Nexus User';
+  const email = sanitizeText(profile?.email, 120) || sanitizeText(fallbackProfile.email, 120) || 'No email connected';
+  const avatar =
+    sanitizeUrl(profile?.avatar) ||
+    sanitizeUrl(fallbackProfile.avatar) ||
+    getDefaultAvatar(name || email);
+
+  return { name, email, avatar };
+};
+
 export const normalizeUserProfile = (profile) => {
   if (!profile || typeof profile !== 'object') return null;
 
   const name = sanitizeText(profile.name, 80);
   const email = sanitizeText(profile.email, 120);
-  const avatar = sanitizeText(profile.avatar, 500);
+  const avatar = sanitizeUrl(profile.avatar);
 
   if (!name || !email) return null;
-  return { name, email, avatar };
+  return {
+    name,
+    email,
+    avatar: avatar || getDefaultAvatar(name || email),
+  };
 };
 
 export const cacheUserProfile = (profile) => {
