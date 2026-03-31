@@ -445,7 +445,7 @@ const ChatArea = () => {
                 <label className="text-xs font-bold uppercase tracking-widest text-zinc-500">System Instruction</label>
                 <textarea
                   value={config.systemPrompt}
-                  onChange={(e) => { setConfig({ ...config, systemPrompt: e.target.value }); toast.success("System prompt updated"); }}
+                  onChange={(e) => setConfig({ ...config, systemPrompt: e.target.value })}
                   className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-xs h-32 resize-none focus:outline-none focus:border-cyan-500/50 transition-colors shadow-inner text-zinc-300 leading-relaxed"
                   placeholder="Define the AI's behavior..."
                 />
