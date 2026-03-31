@@ -6,10 +6,14 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { auth } from '../firebase';
+import { cacheUserProfile, clearCachedUserProfile, getCachedUserProfile } from '../utils/authSecurity';
 
 const Layout = () => {
   const navigate = useNavigate();
   const searchInputRef = useRef(null);
+  const [authProfile, setAuthProfile] = useState(getCachedUserProfile());
   
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -26,8 +30,27 @@ const Layout = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (!firebaseUser) {
+        setAuthProfile(null);
+        return;
+      }
+
+      const profile = cacheUserProfile({
+        name: firebaseUser.displayName || 'Nexus User',
+        email: firebaseUser.email || 'No email',
+        avatar: firebaseUser.photoURL || 'https://api.dicebear.com/9.x/notionists/svg?seed=Guest',
+      });
+
+      setAuthProfile(profile);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   // Fetch real Google Auth data from localStorage
-  const savedUser = JSON.parse(localStorage.getItem('nexus_user'));
+  const savedUser = authProfile;
   
   // Fallback to a Guest profile just in case someone bypasses the login page
   const user = savedUser || {
@@ -45,9 +68,13 @@ const Layout = () => {
     { id: 3, type: "security", title: "New Login", desc: "Access detected from Chrome on Mac OS.", time: "2d ago", unread: false }
   ];
 
-  const handleLogout = () => {
-    localStorage.removeItem('nexus_user');
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } finally {
+      clearCachedUserProfile();
+      navigate('/login', { replace: true });
+    }
   };
 
   return (

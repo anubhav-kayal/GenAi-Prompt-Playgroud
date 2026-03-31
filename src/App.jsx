@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from './firebase';
 
 // Import components
 import Layout from './components/Layout';
@@ -11,19 +13,31 @@ import Login from './components/Login';
 import Landing from './components/Landing';
 
 // 🛡️ AUTHENTICATION GUARDS
-const ProtectedRoute = ({ children }) => {
-  const user = localStorage.getItem('nexus_user');
+const ProtectedRoute = ({ children, user, loading }) => {
+  if (loading) return null;
   if (!user) return <Navigate to="/login" replace />;
   return children;
 };
 
-const PublicRoute = ({ children }) => {
-  const user = localStorage.getItem('nexus_user');
+const PublicRoute = ({ children, user, loading }) => {
+  if (loading) return null;
   if (user) return <Navigate to="/dashboard" replace />;
   return children;
 };
 
 function App() {
+  const [authUser, setAuthUser] = useState(auth.currentUser);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setAuthUser(user);
+      setIsAuthLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   return (
     <BrowserRouter>
       <Routes>
@@ -35,7 +49,7 @@ function App() {
         <Route 
           path="/login" 
           element={
-            <PublicRoute>
+            <PublicRoute user={authUser} loading={isAuthLoading}>
               <Login />
             </PublicRoute>
           } 
@@ -45,7 +59,7 @@ function App() {
         <Route 
           path="/dashboard" 
           element={
-            <ProtectedRoute>
+            <ProtectedRoute user={authUser} loading={isAuthLoading}>
               <Layout />
             </ProtectedRoute>
           }

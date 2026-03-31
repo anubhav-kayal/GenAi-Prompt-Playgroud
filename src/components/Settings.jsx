@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Key, User, Palette, Save, ShieldCheck, AlertCircle, Lock, Database } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { getCachedUserProfile, getSafeStoredObject } from '../utils/authSecurity';
 
 // Custom Mouse-Tracking Spotlight Component
 const SpotlightCard = ({ children, className = "" }) => {
@@ -55,11 +56,11 @@ const Settings = () => {
     if (savedKey) setApiKey(savedKey);
 
     // 2. Load Real Google Auth Profile
-    const savedUser = JSON.parse(localStorage.getItem('nexus_user'));
+    const savedUser = getCachedUserProfile();
     if (savedUser) setUserProfile(savedUser);
 
     // 3. Load User Preferences
-    const savedPrefs = JSON.parse(localStorage.getItem('nexus_prefs'));
+    const savedPrefs = getSafeStoredObject('nexus_prefs', null);
     if (savedPrefs) setToggles(savedPrefs);
   }, []);
 

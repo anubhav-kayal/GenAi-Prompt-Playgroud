@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Zap, ShieldCheck, Sparkles, Loader2, AlertCircle } from 'lucide-react';
-import { signInWithPopup } from 'firebase/auth';
+import { signInWithPopup, setPersistence, browserSessionPersistence } from 'firebase/auth';
 import { auth, provider } from '../firebase'; // Imports the Firebase file you created
+import { cacheUserProfile } from '../utils/authSecurity';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -16,19 +17,21 @@ const Login = () => {
     setError('');
     
     try {
+      await setPersistence(auth, browserSessionPersistence);
+
       // 1. Trigger the Google popup
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       
       // 2. Save the real user data to localStorage so Layout.jsx can show your profile picture
-      localStorage.setItem('nexus_user', JSON.stringify({
+      cacheUserProfile({
         name: user.displayName,
         email: user.email,
         avatar: user.photoURL
-      }));
+      });
 
       // 3. Navigate to the Dashboard after successful login
-      navigate('/dashboard');
+      navigate('/dashboard', { replace: true });
       
     } catch (error) {
       console.error("Auth Error:", error);
