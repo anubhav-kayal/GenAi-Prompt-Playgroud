@@ -11,6 +11,7 @@ import CodeAnalyzer from './components/CodeAnalyzer';
 import Settings from './components/Settings';
 import Login from './components/Login';
 import Landing from './components/Landing';
+import Profile from './components/Profile';
 
 // 🛡️ AUTHENTICATION GUARDS
 const ProtectedRoute = ({ children, user, loading }) => {
@@ -69,7 +70,10 @@ function App() {
           
           {/* path: /dashboard/playground */}
           <Route path="playground" element={<ChatArea />} />
-          
+
+           {/* path: /dashboard/profile */}
+          <Route path="profile" element={<Profile />} />
+
           {/* path: /dashboard/code-analyzer */}
           <Route path="code-analyzer" element={<CodeAnalyzer />} />
           

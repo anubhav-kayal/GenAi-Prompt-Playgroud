@@ -10,6 +10,8 @@ import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 import { cacheUserProfile, clearCachedUserProfile, getCachedUserProfile } from '../utils/authSecurity';
 
+
+
 const Layout = () => {
   const navigate = useNavigate();
   const searchInputRef = useRef(null);
@@ -211,7 +213,7 @@ const Layout = () => {
                     <div className="px-4 py-2 border-b border-zinc-800 mb-1">
                       <p className="text-xs text-zinc-400 uppercase tracking-wider font-bold">Account</p>
                     </div>
-                    <button className="w-full text-left px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800 transition-colors">Profile Settings</button>
+                    <button onClick={() => navigate("/dashboard/profile")} className="w-full text-left px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800 transition-colors">Profile Settings</button>
                     <button className="w-full text-left px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800 transition-colors">Billing & Quotas</button>
                     <div className="h-px bg-zinc-800 my-1"></div>
                     <button onClick={handleLogout} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-rose-400 hover:bg-rose-500/10 transition-colors">
