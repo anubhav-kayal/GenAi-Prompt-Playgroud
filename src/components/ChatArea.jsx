@@ -101,6 +101,9 @@ const ChatArea = () => {
 
   const handleGenerate = async () => {
     if (!input.trim()) return;
+
+    const requestId = Date.now();
+    activeRequestRef.current = requestId;
     
     const userMessage = { role: 'user', content: input };
     setMessages(prev => [...prev, userMessage]);
@@ -132,6 +135,10 @@ const ChatArea = () => {
 
       const result = await chat.sendMessage(userMessage.content);
       const responseText = result.response.text();
+
+      if (activeRequestRef.current !== requestId) {
+        return;
+      }
       
       setMessages(prev => [...prev, { role: 'ai', content: responseText }]);
       logActivity("Text Generation", "Playground Chat", "Success", Math.round(responseText.length / 4));
@@ -144,7 +151,9 @@ const ChatArea = () => {
       }]);
       logActivity("System Error", "API Timeout/Auth", "Failed", 0);
     } finally {
-      setIsTyping(false);
+      if (activeRequestRef.current === requestId) {
+        setIsTyping(false);
+      }
     }
   };
 
@@ -395,7 +404,10 @@ const ChatArea = () => {
                 </button>
 
                 {isTyping ? (
-                  <button className="bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 p-2.5 rounded-xl transition-colors">
+                  <button
+                    onClick={stopGeneration}
+                    className="bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 p-2.5 rounded-xl transition-colors"
+                  >
                     <StopCircle size={18} />
                   </button>
                 ) : (
