@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { 
-  Zap, LayoutDashboard, MessageSquare, Code2, Settings, 
+  Zap, LayoutDashboard, MessageSquare, Code2, Settings, CreditCard,
   Search, Bell, LogOut, ChevronDown, Activity, ShieldAlert
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -112,6 +112,7 @@ const Layout = () => {
             { to: "/dashboard", icon: <LayoutDashboard size={18} />, label: "Dashboard" },
             { to: "/dashboard/playground", icon: <MessageSquare size={18} />, label: "Playground" },
             { to: "/dashboard/code-analyzer", icon: <Code2 size={18} />, label: "Code Analyzer" },
+            { to: "/dashboard/billing", icon: <CreditCard size={18} />, label: "Billing" },
             { to: "/dashboard/settings", icon: <Settings size={18} />, label: "Settings" },
           ].map((item) => (
             <NavLink 
@@ -229,7 +230,7 @@ const Layout = () => {
                       <p className="text-xs text-zinc-400 uppercase tracking-wider font-bold">Account</p>
                     </div>
                     <button onClick={() => navigate("/dashboard/profile")} className="w-full text-left px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800 transition-colors">Profile Settings</button>
-                    <button className="w-full text-left px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800 transition-colors">Billing & Quotas</button>
+                    <button onClick={() => navigate("/dashboard/billing")} className="w-full text-left px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800 transition-colors">Billing & Quotas</button>
                     <div className="h-px bg-zinc-800 my-1"></div>
                     <button onClick={handleLogout} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-rose-400 hover:bg-rose-500/10 transition-colors">
                       <LogOut size={16} /> Sign out

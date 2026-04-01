@@ -8,6 +8,7 @@ import Layout from './components/Layout';
 import Dashboard from './components/Dashboard';
 import ChatArea from './components/ChatArea';
 import CodeAnalyzer from './components/CodeAnalyzer';
+import Billing from './components/Billing';
 import Settings from './components/Settings';
 import Login from './components/Login';
 import Landing from './components/Landing';
@@ -76,6 +77,9 @@ function App() {
 
           {/* path: /dashboard/code-analyzer */}
           <Route path="code-analyzer" element={<CodeAnalyzer />} />
+
+          {/* path: /dashboard/billing */}
+          <Route path="billing" element={<Billing />} />
           
           {/* path: /dashboard/settings */}
           <Route path="settings" element={<Settings />} />

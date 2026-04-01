@@ -1,17 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Activity, Cpu, Zap, Target, ArrowRight, Database, BarChart3, Terminal } from 'lucide-react';
+import { Activity, Cpu, Zap, Target, ArrowRight, Database, DollarSign, Terminal } from 'lucide-react';
 import { getLogs, getStats } from '../utils/logger';
+import { formatUsd, getMonthUsage } from '../utils/billing';
 
 const Dashboard = () => {
   const [logs, setLogs] = useState([]);
-  const [statsData, setStatsData] = useState({ totalCalls: 0, successRate: 0, totalTokens: 0 });
+  const [statsData, setStatsData] = useState({ totalCalls: 0, successRate: 0, totalTokens: 0, totalSpendUsd: 0 });
+  const [monthUsage, setMonthUsage] = useState({ totalSpendUsd: 0, totalTokens: 0 });
 
   // Fetch the real data from local storage when the dashboard loads
   useEffect(() => {
-    setLogs(getLogs().slice(0, 5)); // Grab the 5 most recent activities
+    const allLogs = getLogs();
+    setLogs(allLogs.slice(0, 5)); // Grab the 5 most recent activities
     setStatsData(getStats());
+    setMonthUsage(getMonthUsage(allLogs));
   }, []);
 
   // Helper to format large token numbers (e.g., 1200 -> 1.2k)
@@ -24,7 +28,7 @@ const Dashboard = () => {
     { label: "Total API Calls", value: statsData.totalCalls.toString(), icon: <Activity size={18} className="text-cyan-400" />, trend: "Live" },
     { label: "Tokens Processed", value: formatTokens(statsData.totalTokens), icon: <Cpu size={18} className="text-purple-400" />, trend: "Live" },
     { label: "Success Rate", value: `${statsData.successRate}%`, icon: <Target size={18} className="text-emerald-400" />, trend: statsData.successRate >= 80 ? "+Healthy" : "-Warn" },
-    { label: "Active Models", value: "Gemini 2.5", icon: <Database size={18} className="text-blue-400" />, trend: "Flash" },
+    { label: "Spend (Month)", value: formatUsd(monthUsage.totalSpendUsd), icon: <DollarSign size={18} className="text-blue-400" />, trend: "USD" },
   ];
 
   // Calculate dynamic quota progress (assuming a 10,000 token test limit for the UI)
@@ -132,6 +136,10 @@ const Dashboard = () => {
                   <span className="text-sm font-semibold text-zinc-300 group-hover/btn:text-cyan-400 transition-colors">Refactor Codebase</span>
                   <ArrowRight size={16} className="text-zinc-600 group-hover/btn:text-cyan-400 group-hover/btn:translate-x-1 transition-all" />
                 </NavLink>
+                <NavLink to="/billing" className="flex items-center justify-between p-4 rounded-xl bg-zinc-950/50 border border-zinc-800 hover:border-cyan-500/50 hover:bg-zinc-900 transition-all group/btn">
+                  <span className="text-sm font-semibold text-zinc-300 group-hover/btn:text-cyan-400 transition-colors">Billing & Quotes</span>
+                  <ArrowRight size={16} className="text-zinc-600 group-hover/btn:text-cyan-400 group-hover/btn:translate-x-1 transition-all" />
+                </NavLink>
               </div>
             </div>
           </motion.div>
@@ -168,6 +176,9 @@ const Dashboard = () => {
                             </div>
                             {log.tokens > 0 && (
                               <span className="text-[10px] text-zinc-500 font-mono">~{log.tokens} tokens</span>
+                            )}
+                            {Number(log.costUsd || 0) > 0 && (
+                              <span className="text-[10px] text-zinc-500 font-mono">{formatUsd(log.costUsd)}</span>
                             )}
                           </div>
                         </div>

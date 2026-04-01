@@ -9,6 +9,7 @@ import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { logActivity } from '../utils/logger';
+import { extractUsageFromGeminiResponse, calculateRequestCostUsd, roundUsd } from '../utils/billing';
 import toast from 'react-hot-toast';
 
 const PROMPT_VERSIONS_KEY = 'nexus_prompt_versions';
@@ -135,13 +136,31 @@ const ChatArea = () => {
 
       const result = await chat.sendMessage(userMessage.content);
       const responseText = result.response.text();
+      const usage = extractUsageFromGeminiResponse(result.response, responseText);
+      const cost = calculateRequestCostUsd({
+        model: 'gemini-2.5-flash',
+        inputTokens: usage.inputTokens,
+        outputTokens: usage.outputTokens,
+        cachedInputTokens: usage.cachedInputTokens,
+      });
 
       if (activeRequestRef.current !== requestId) {
         return;
       }
       
       setMessages(prev => [...prev, { role: 'ai', content: responseText }]);
-      logActivity("Text Generation", "Playground Chat", "Success", Math.round(responseText.length / 4));
+      logActivity("Text Generation", "Playground Chat", "Success", usage.totalTokens, {
+        requestType: 'chat',
+        model: 'gemini-2.5-flash',
+        inputTokens: usage.inputTokens,
+        outputTokens: usage.outputTokens,
+        cachedInputTokens: usage.cachedInputTokens,
+        totalTokens: usage.totalTokens,
+        costUsd: cost.totalCostUsd,
+      });
+      toast.success(
+        `Response generated | ${usage.totalTokens} tokens | ${roundUsd(cost.totalCostUsd)} USD`
+      );
 
     } catch (error) {
       setMessages(prev => [...prev, { 
@@ -149,7 +168,11 @@ const ChatArea = () => {
         content: `### ⚠️ Connection Error\nCheck your \`.env.local\` file API key.\n\n\`${error.message}\``,
         isError: true
       }]);
-      logActivity("System Error", "API Timeout/Auth", "Failed", 0);
+      logActivity("System Error", "Playground Chat", "Failed", 0, {
+        requestType: 'chat',
+        model: 'gemini-2.5-flash',
+        errorMessage: error.message,
+      });
     } finally {
       if (activeRequestRef.current === requestId) {
         setIsTyping(false);
