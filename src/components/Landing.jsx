@@ -186,7 +186,7 @@ const Landing = () => {
           </div>
           <div className="text-center md:text-right">
             <p className="text-zinc-700 text-[10px] font-black uppercase tracking-[0.5em] mb-2">Enterprise Software Solutions</p>
-            <p className="text-white font-bold text-sm">Developed by Anubhav Kayal</p>
+            <p className="text-white font-bold text-sm">Developed by Team DDDA</p>
           </div>
         </div>
       </footer>
