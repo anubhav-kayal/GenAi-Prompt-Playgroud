@@ -166,10 +166,10 @@ MIT License
 
 ## 👨‍💻 Author
 
-**Anubhav Kayal**
-**Dev Mahendru**
-**Devraj Chandani**
-**Deep Arijit Prasad**
+-**Anubhav Kayal**
+-**Dev Mahendru**
+-**Devraj Chandani**
+-**Deep Arjit Prasad**
 
 ---
 
