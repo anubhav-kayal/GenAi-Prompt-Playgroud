@@ -9,6 +9,7 @@ import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { logActivity } from '../utils/logger';
+import { extractUsageFromGeminiResponse, calculateRequestCostUsd, roundUsd } from '../utils/billing';
 import toast from 'react-hot-toast';
 
 const CodeAnalyzer = () => {
@@ -34,13 +35,34 @@ const CodeAnalyzer = () => {
       });
 
       const responseText = result.response.text();
+      const usage = extractUsageFromGeminiResponse(result.response, responseText);
+      const cost = calculateRequestCostUsd({
+        model: 'gemini-2.5-flash',
+        inputTokens: usage.inputTokens,
+        outputTokens: usage.outputTokens,
+        cachedInputTokens: usage.cachedInputTokens,
+      });
       setOutputCode(responseText);
-      logActivity("Code Refactor", "AST Optimization", "Success", Math.round(responseText.length / 4));
-      toast.success("Code successfully refactored!");
+      logActivity("Code Refactor", "AST Optimization", "Success", usage.totalTokens, {
+        requestType: 'code-analyzer',
+        model: 'gemini-2.5-flash',
+        inputTokens: usage.inputTokens,
+        outputTokens: usage.outputTokens,
+        cachedInputTokens: usage.cachedInputTokens,
+        totalTokens: usage.totalTokens,
+        costUsd: cost.totalCostUsd,
+      });
+      toast.success(
+        `Code refactored | ${usage.totalTokens} tokens | ${roundUsd(cost.totalCostUsd)} USD`
+      );
 
     } catch (error) {
       setOutputCode(`### ⚠️ System Fault\nAnalysis interrupted. Check connectivity or API credentials.\n\n\`${error.message}\``);
-      logActivity("System Error", "API Timeout/Auth", "Failed", 0);
+      logActivity("System Error", "Code Analyzer", "Failed", 0, {
+        requestType: 'code-analyzer',
+        model: 'gemini-2.5-flash',
+        errorMessage: error.message,
+      });
       toast.error("Analysis failed. Check logs.");
     } finally {
       setIsAnalyzing(false);

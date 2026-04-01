@@ -1,36 +1,77 @@
-export const logActivity = (type, target, status, tokens = 0) => {
-  // 1. Fetch existing logs (or an empty array if none exist)
-  const existingLogs = JSON.parse(localStorage.getItem('nexus_logs') || '[]');
-  
-  // 2. Create the new log entry
+const LOG_KEY = 'nexus_logs';
+const MAX_LOGS = 200;
+
+const safeParse = (value, fallback) => {
+  if (!value) return fallback;
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+export const logActivity = (type, target, status, tokens = 0, meta = {}) => {
+  const existingLogs = safeParse(localStorage.getItem(LOG_KEY), []);
+
+  const inputTokens = Number(meta.inputTokens ?? 0);
+  const outputTokens = Number(meta.outputTokens ?? 0);
+  const cachedInputTokens = Number(meta.cachedInputTokens ?? 0);
+
+  const fallbackTotalFromParts = inputTokens + outputTokens;
+  const totalTokens = Number(
+    meta.totalTokens ?? (fallbackTotalFromParts > 0 ? fallbackTotalFromParts : tokens ?? 0)
+  );
+
   const newLog = {
     id: Date.now(),
-    type,       // e.g., "Code Refactor" or "Text Generation"
-    target,     // e.g., "React useEffect debug"
-    status,     // "Success" or "Failed"
-    tokens,     // Estimated tokens used
+    type,
+    target,
+    status,
+    requestType: meta.requestType || type,
+    model: meta.model || 'unknown-model',
+    inputTokens,
+    outputTokens,
+    cachedInputTokens,
+    totalTokens,
+    tokens: totalTokens,
+    costUsd: Number(meta.costUsd ?? 0),
+    currency: 'USD',
+    errorMessage: meta.errorMessage || '',
     time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    timestamp: Date.now()
+    timestamp: Date.now(),
   };
 
-  // 3. Save the updated array back to local storage (keeping only the latest 50 logs to save space)
-  const updatedLogs = [newLog, ...existingLogs].slice(0, 50);
-  localStorage.setItem('nexus_logs', JSON.stringify(updatedLogs));
-  
+  const updatedLogs = [newLog, ...existingLogs].slice(0, MAX_LOGS);
+  localStorage.setItem(LOG_KEY, JSON.stringify(updatedLogs));
   return updatedLogs;
 };
 
 export const getLogs = () => {
-  return JSON.parse(localStorage.getItem('nexus_logs') || '[]');
+  return safeParse(localStorage.getItem(LOG_KEY), []);
 };
 
 export const getStats = () => {
   const logs = getLogs();
-  const successfulLogs = logs.filter(log => log.status === 'Success');
-  
+  const successfulLogs = logs.filter((log) => log.status === 'Success');
+
+  const inputTokens = logs.reduce((sum, log) => sum + Number(log.inputTokens || 0), 0);
+  const outputTokens = logs.reduce((sum, log) => sum + Number(log.outputTokens || 0), 0);
+  const totalTokens = logs.reduce((sum, log) => sum + Number(log.totalTokens || log.tokens || 0), 0);
+  const totalSpendUsd = logs.reduce((sum, log) => sum + Number(log.costUsd || 0), 0);
+
   return {
     totalCalls: logs.length,
     successRate: logs.length ? Math.round((successfulLogs.length / logs.length) * 100) : 0,
-    totalTokens: logs.reduce((sum, log) => sum + (log.tokens || 0), 0)
+    inputTokens,
+    outputTokens,
+    totalTokens,
+    totalSpendUsd: Number(totalSpendUsd.toFixed(6)),
+    avgCostPerCallUsd: logs.length ? Number((totalSpendUsd / logs.length).toFixed(6)) : 0,
   };
 };
+
+export const clearLogs = () => {
+  localStorage.removeItem(LOG_KEY);
+};
+
