@@ -117,6 +117,7 @@ const Layout = () => {
           ].map((item) => (
             <NavLink 
               key={item.to} to={item.to} 
+              end={item.to === "/dashboard"}
               className={({ isActive }) => `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 text-sm font-medium ${isActive ? 'bg-zinc-800/80 text-cyan-400 shadow-inner border border-zinc-700/50' : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'}`}
             >
               {item.icon} {item.label}
